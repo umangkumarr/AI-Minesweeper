@@ -6,9 +6,10 @@ var blocksY = 20;
 let blockSize;
 let xOffset;
 let yOffset;
-let maxBlocks = 500;
-let totalBees = 70;
+let maxBlocks = 800;
+let totalBees = 120;
 let headerSize = 80
+let speedMultiplier = 1;
 
 let dx = [0, -1, 0, 1, -1, 1, -1, 1];
 let dy = [1, 0, -1, 0, -1, 1, 1, -1];
@@ -92,7 +93,9 @@ function draw() {
         noLoop();
     }
 
-    update();
+    for (let i = 0; i < speedMultiplier; i++) {
+        update();
+    }
 
     fill(255);
     for (var i = 0; i < grid.length; i++) {
@@ -110,24 +113,22 @@ function GameOver() {
     dead = true;
 }
 
-function mousePressed(event) {
-    if (mouseButton === LEFT) {
-        for (let i = 0; i < grid.length; i++) {
-            if (!grid[i].revealed && grid[i].contains(mouseX, mouseY)) {
-                grid[i].reveal();
-                if (grid[i].bee) {
-                    GameOver();
-                }
-            }
-        }
-    } else {
-        for (let i = 0; i < grid.length; i++) {
-            if (!grid[i].revealed && grid[i].contains(mouseX, mouseY)) {
-                grid[i].flag ^= 1;
-            }
-        }
+function keyPressed() {
+    switch (key) {
+        case ' ':
+            speedMultiplier = 10;
+            break;
     }
 }
+
+function keyReleased() {
+    switch (key) {
+        case ' ':
+            speedMultiplier = 1;
+            break;
+    }
+}
+
 
 function windowResized() {
     setup();
@@ -173,6 +174,7 @@ function move() {
             }
             if (known == nbr.neighbours) {
                 j.reveal();
+                checked.splice(i, 1);
                 totalRevealed++;
                 return;
             }
@@ -181,7 +183,15 @@ function move() {
 
     if ("do some random shit") {
 
-        let rand = floor(random(0, grid.length));
+        let rand;
+        if (checked.length) {
+            rand = floor(random(0, checked.length));
+            checked[rand].reveal();
+            totalRevealed++;
+            return;
+        }
+
+        rand = floor(random(0, grid.length));
         console.log(rand, grid[rand]);
         while (!dead && (grid[rand].revealed || grid[rand].flag)) {
             rand = floor(random(0, grid.length));
